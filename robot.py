@@ -112,18 +112,18 @@ class Collybot(Robot):
 
     def left(self):
         print("moving left")
-        self.fl = -2*self.front_master_power
-        self.fr = 2*self.front_master_power
-        self.bl = 2*self.back_master_power
-        self.br = -2*self.back_master_power
+        self.fl = -1*self.front_master_power
+        self.fr = 1*self.front_master_power
+        self.bl = 1*self.back_master_power
+        self.br = -1*self.back_master_power
         self.move()
 
     def right(self):
         print("moving right")
-        self.fl = 2*self.front_master_power
-        self.fr = -2*self.front_master_power
-        self.bl = -2*self.back_master_power
-        self.br = 2*self.back_master_power
+        self.fl = 1*self.front_master_power
+        self.fr = -1*self.front_master_power
+        self.bl = -1*self.back_master_power
+        self.br = 1*self.back_master_power
         self.move()
 
     def stop(self):
@@ -362,15 +362,15 @@ class Collybot(Robot):
                     pass
     def where_CanX(self):
         print(self.boxposition)
-        if self.boxposition[0] >= 400:
+        if self.boxposition[0] >= 600:
             print("going left")
             self.left()
             time.sleep(0.05)
-        elif self.boxposition[0] >= 150 and self.boxposition[0] <= 400:
+        elif self.boxposition[0] >= 100 and self.boxposition[0] <= 600:
             print("in the centre")
             self.forwards()
-            time.sleep(0.2)
-        elif self.boxposition[0] <= 150:
+            time.sleep(0.3)
+        elif self.boxposition[0] <= 100:
             print("going right!")
             self.right()
             time.sleep(0.05)
