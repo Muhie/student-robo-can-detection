@@ -366,11 +366,11 @@ class Collybot(Robot):
             print("going left")
             self.left()
             time.sleep(0.1)
-        elif self.boxposition[0] >= 100 and self.boxposition[0] <= 600:
+        elif self.boxposition[0] >= 190 and self.boxposition[0] <= 600:
             print("in the centre")
             self.forwards()
             time.sleep(0.4)
-        elif self.boxposition[0] <= 100:
+        elif self.boxposition[0] <= 190:
             print("going right!")
             self.right()
             time.sleep(0.1)
