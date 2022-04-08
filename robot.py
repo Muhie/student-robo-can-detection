@@ -362,14 +362,14 @@ class Collybot(Robot):
                     pass
     def where_CanX(self):
         print(self.boxposition)
-        if self.boxposition[0] >= 600:
+        if self.boxposition[0] >= 615:
             print("going left")
             self.left()
             time.sleep(0.05)
         elif self.boxposition[0] >= 100 and self.boxposition[0] <= 600:
             print("in the centre")
             self.forwards()
-            time.sleep(0.3)
+            time.sleep(0.4)
         elif self.boxposition[0] <= 100:
             print("going right!")
             self.right()
@@ -401,7 +401,7 @@ class Collybot(Robot):
         for i in range(1,100):
                 print("pass")
                 print(i)
-                time.sleep(0.2)
+                time.sleep(0.1)
                 try:
                     self.camera.save(self.usbkey / "can_Detection.png")
                     time.sleep(0.1)
