@@ -366,7 +366,7 @@ class Collybot(Robot):
         elif self.boxposition[0] >= 76 and self.boxposition[0] <= 799:
             print("in the centre")
             self.forwards()
-            time.sleep(0.4)
+            time.sleep(0.8)
         elif self.boxposition[0] <= 75:
             print("going right!")
             self.right()
@@ -379,18 +379,18 @@ class Collybot(Robot):
             if self.runonce <= 1:
                 self.where_CanX()
                 self.DrawLines()
-                self.runonce + 1
+                self.runonce += 1
             else:
                 self.stop()
                 self.power_board.piezo.buzz(0.3, Note.C6)
         elif self.boxposition[3] < 649 and self.boxposition[3] > 400: 
             print("getting closer")
-            self.medium()
+            self.slow()
             print(self.runonce)
             if self.runonce <= 1:
                 self.where_CanX()
                 self.DrawLines()
-                self.runonce + 1
+                self.runonce += 1
             else:
                 self.stop()
         elif self.boxposition[3] >= 650:
@@ -415,7 +415,7 @@ class Collybot(Robot):
                     time.sleep(0.5)
                     print("trying to find cans")
                     self.can_Regonition()
-                    time.sleep(0.5)
+                    time.sleep(1)
                     self.runonce = 0
                 except:
                     print("EXCEPT IS RUNING")
