@@ -27,11 +27,10 @@ class Collybot(Robot):
         self.configPath =path+"/ssd_mobilenet_v3_large_coco_2020_01_14.pbtxt"
         print(self.weightsPath,self.configPath)
         self.net = cv2.dnn_DetectionModel(self.weightsPath,self.configPath)
-        self.net.setInputSize(200,200)
+        self.net.setInputSize(160,160)
         self.net.setInputScale(1.0/ 127.5)
         self.net.setInputMean((127.5,127.5,127.5))
         self.net.setInputSwapRB(True)
-        self.marker_ids = self.camera.save(self.usbkey / "initial-view.png")
 
     def power_H0(self):
         self.power_board.outputs[OUT_H0].is_enabled = True
@@ -112,16 +111,16 @@ class Collybot(Robot):
 
     def left(self):
         print("moving left")
-        self.fl = -2.5*self.front_master_power
-        self.fr = 2.5*self.front_master_power
+        self.fl = -2.6*self.front_master_power
+        self.fr = 2.6*self.front_master_power
         self.bl = 1.5*self.back_master_power
         self.br = -1.5*self.back_master_power
         self.move()
 
     def right(self):
         print("moving right")
-        self.fl = 2.5*self.front_master_power
-        self.fr = -2.5*self.front_master_power
+        self.fl = 2.6*self.front_master_power
+        self.fr = -2.6*self.front_master_power
         self.bl = -1.5*self.back_master_power
         self.br = 1.5*self.back_master_power
         self.move()
@@ -321,7 +320,7 @@ class Collybot(Robot):
         print("opening file!")
         img = cv2.imread(self.path1+"/can_Detection.png")
         #success,img = self.cap.read()
-        classIds,confs,bbox = self.net.detect(img,confThreshold=0.25)
+        classIds,confs,bbox = self.net.detect(img,confThreshold=0.3)
         if len(classIds) >= 1:
             for classId,confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
                 can = self.classNames[classId-1]
@@ -343,12 +342,10 @@ class Collybot(Robot):
                 if can == "bowl":
                     print("I found a can")
                     #print(fullyformatted)
-                    self.where_CanX()
                     self.where_CanY()
                 elif can == "cup":
                     print("I found a can")
                     print(fullyformatted)
-                    self.where_CanX()
                     self.where_CanY()
                 #elif can == "cell phone":
                     #print("I found something useful")
@@ -362,34 +359,35 @@ class Collybot(Robot):
                     pass
     def where_CanX(self):
         print(self.boxposition)
-        if self.boxposition[0] >= 625:
+        if self.boxposition[0] >= 800:
             print("going left")
             self.left()
             time.sleep(0.1)
-        elif self.boxposition[0] >= 190 and self.boxposition[0] <= 600:
+        elif self.boxposition[0] >= 76 and self.boxposition[0] <= 799:
             print("in the centre")
             self.forwards()
             time.sleep(0.4)
-        elif self.boxposition[0] <= 190:
+        elif self.boxposition[0] <= 75:
             print("going right!")
             self.right()
             time.sleep(0.1)
     def where_CanY(self):
-        if self.boxposition[3] > 250 and self.boxposition[3] >= 350:
-            print("getting closer!")
+        if self.boxposition[3] < 300 and self.boxposition[3] > 50:
+            print("we are very close")
             self.slow()
+            self.where_CanX()
             self.DrawLines()
-        elif self.boxposition[3] < 250 and self.boxposition[3] > 60: 
-            print("getting further away")
-            self.slow()
+            self.power_board.piezo.buzz(0.3, Note.C6)
+        elif self.boxposition[3] < 649 and self.boxposition[3] > 300: 
+            print("getting closer")
+            self.medium()
+            self.where_CanX()
             self.DrawLines()
-        elif self.boxposition[3] >= 350:
+        elif self.boxposition[3] >= 650:
+            print("getting far away")
             self.braking()
             self.stop()
-            self.power_board.piezo.buzz(0.1, Note.C6)
-        else:
-            self.stop
-            print("object detected is too far away.")
+            self.power_board.piezo.buzz(0.3, Note.C6)
     def DrawLines(self):
         #7print(self.confs1)
         #if self.confs1 > 0.19:
@@ -401,10 +399,8 @@ class Collybot(Robot):
         for i in range(1,100):
                 print("pass")
                 print(i)
-                time.sleep(0.1)
                 try:
                     self.camera.save(self.usbkey / "can_Detection.png")
-                    time.sleep(0.1)
                     print("trying to find cans")
                     self.can_Regonition()
                 except:
