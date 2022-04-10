@@ -319,8 +319,7 @@ class Collybot(Robot):
     def can_Regonition(self):
         print("opening file!")
         img = cv2.imread(self.path1+"/can_Detection.png")
-        #success,img = self.cap.read()
-        classIds,confs,bbox = self.net.detect(img,confThreshold=0.20)
+        classIds,confs,bbox = self.net.detect(img,confThreshold=0.25)
         if len(classIds) >= 1:
             for classId,confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
                 can = self.classNames[classId-1]
@@ -340,7 +339,7 @@ class Collybot(Robot):
                     print("I found a can")
                     print(fullyformatted)
                     self.where_CanY()
-                    self.runfind +1
+                    self.runfind + 1
                 else:
                     print("can not found")
                     self.braking()
@@ -356,7 +355,7 @@ class Collybot(Robot):
         elif self.boxposition[0] >= 151 and self.boxposition[0] <= 799:
             print("in the centre")
             self.forwards()
-            time.sleep(2)
+            time.sleep(1.5)
             self.stop()
         elif self.boxposition[0] <= 150:
             print("going right!")
@@ -366,54 +365,48 @@ class Collybot(Robot):
     def where_CanY(self):
         if self.boxposition[3] < 100 and self.boxposition[3] > 50:
             print("we are very far away")
-            self.medium()
+            self.slow()
             print(self.runonce)
             if self.runonce <= 1:
                 self.where_CanX()
                 #self.DrawLines()
-                self.runonce += 1
+                self.runonce + 1
             else:
                 self.stop()
-        elif self.boxposition[3] < 500 and self.boxposition[3] > 100: 
+        elif self.boxposition[3] < 649 and self.boxposition[3] > 100: 
             print("getting closer")
             self.slow()
             print(self.runonce)
             if self.runonce <= 1:
                 self.where_CanX()
                 #self.DrawLines()
-                self.runonce += 1
+                self.runonce + 1
             else:
                 self.stop()
         elif self.boxposition[3] >= 650 and self.boxposition < 800:
             print("object detected is extremely close ")
             self.braking()
             self.stop()
-            self.power_board.piezo.buzz(0.3, Note.C6)
         else:
             print("object is too far away ignoring")
-            self.power_board.piezo.buzz(1, Note.C6)
-    def DrawLines(self):
-        #7print(self.confs1)
-        #if self.confs1 > 0.19:
-        cv2.rectangle(self.img1,self.box1,color=(0,255,0),thickness = 10)
-        print(self.box1)
     
     def start(self):
         #self.scale_conversion()
-        for i in range(1,100):
+        for i in range(1,25):
                 print("pass")
                 print(i)
                 try:
-                    time.sleep(0.25)
+                    time.sleep(0.05)
                     self.camera.save(self.usbkey / "can_Detection.png")
                     time.sleep(0.2)
                     print("trying to find cans")
                     self.can_Regonition()
-                    time.sleep(0.2)
+                    time.sleep(0.05)
                     self.runonce = 0
                     self.runfind = 0
                 except:
                     print("EXCEPT IS RUNING")
+        
 def main():
     jeff = Collybot()
     jeff.start()
