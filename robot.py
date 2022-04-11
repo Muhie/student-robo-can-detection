@@ -291,8 +291,8 @@ class Collybot(Robot):
                     time.sleep(0.25)
                     self.stop()
 
-    def emergancy(self):
-        #Emergancy shutdown, logs power status of battery
+    def emergency(self):
+        #emergency shutdown, logs power status of battery
         self.power_board.outputs.power_off()
         print(self.power_board.battery_sensor.current)
         print(self.power_board.battery_sensor.voltage)
@@ -316,6 +316,18 @@ class Collybot(Robot):
     #     for i in range(rotations):
     #         self.servo.position=1
     #         time.sleep(1)
+    def rotateclockwise(self):
+        self.slow()
+        self.fl = -2*self.front_master_power
+        self.fr = 2*self.front_master_power
+        self.bl = -2*self.back_master_power
+        self.br = 2*self.back_master_power
+        self.move()
+    def returntosender(self):
+        self.rotateclockwise()
+        time.sleep(7.5)
+
+
     def can_Regonition(self):
         print("opening file!")
         img = cv2.imread(self.path1+"/can_Detection.png")
@@ -331,15 +343,13 @@ class Collybot(Robot):
                 formatted = coords.replace('[','')
                 fullyformatted = formatted.replace(']','')
                 self.boxposition = box
-                if can == "bowl" and self.runfind <= 1:
+                if can == "bowl":
                     print("I found a can")
                     self.where_CanY()
-                    self.runfind + 1
-                elif can == "cup" and self.runfind <= 1:
+                elif can == "cup":
                     print("I found a can")
                     print(fullyformatted)
                     self.where_CanY()
-                    self.runfind + 1
                 else:
                     print("can not found")
                     self.braking()
@@ -350,62 +360,55 @@ class Collybot(Robot):
         if self.boxposition[0] >= 700:
             print("going left")
             self.left()
-            time.sleep(0.2)
+            time.sleep(0.1)
             self.stop()
-        elif self.boxposition[0] >= 151 and self.boxposition[0] <= 799:
+        elif self.boxposition[0] >= 171 and self.boxposition[0] <= 799:
             print("in the centre")
             self.forwards()
-            time.sleep(1.5)
+            time.sleep(0.5)
             self.stop()
-        elif self.boxposition[0] <= 150:
+        elif self.boxposition[0] <= 170:
             print("going right!")
             self.right()
-            time.sleep(0.2)
+            time.sleep(0.1)
             self.stop()
     def where_CanY(self):
         if self.boxposition[3] < 100 and self.boxposition[3] > 50:
             print("we are very far away")
             self.slow()
             print(self.runonce)
-            if self.runonce <= 1:
-                self.where_CanX()
-                #self.DrawLines()
-                self.runonce + 1
-            else:
-                self.stop()
+            self.where_CanX()
+            #self.DrawLines()
         elif self.boxposition[3] < 649 and self.boxposition[3] > 100: 
             print("getting closer")
             self.slow()
             print(self.runonce)
-            if self.runonce <= 1:
-                self.where_CanX()
-                #self.DrawLines()
-                self.runonce + 1
-            else:
-                self.stop()
+            self.where_CanX()
         elif self.boxposition[3] >= 650 and self.boxposition < 800:
             print("object detected is extremely close ")
             self.braking()
             self.stop()
         else:
             print("object is too far away ignoring")
-    
+    def canSeeker(self):
+        for i in range(1,20):
+            print("pass")
+            print(i)
+            try:
+                time.sleep(0.1)
+                self.camera.save(self.usbkey / "can_Detection.png")
+                print("trying to find cans")
+                self.can_Regonition()
+            except:
+                print("EXCEPT IS RUNING")
+        self.returntosender()
+        self.chase_the_markers_advanced()
     def start(self):
-        #self.scale_conversion()
-        for i in range(1,25):
-                print("pass")
-                print(i)
-                try:
-                    time.sleep(0.05)
-                    self.camera.save(self.usbkey / "can_Detection.png")
-                    time.sleep(0.2)
-                    print("trying to find cans")
-                    self.can_Regonition()
-                    time.sleep(0.05)
-                    self.runonce = 0
-                    self.runfind = 0
-                except:
-                    print("EXCEPT IS RUNING")
+        time.sleep(10)
+        self.power_board.piezo.buzz(1, 1047)
+        self.scale_conversion()
+        self.canSeeker()
+            
         
 def main():
     jeff = Collybot()
