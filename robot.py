@@ -197,7 +197,7 @@ class Collybot(Robot):
             markers = self.camera.see()
             if markers:
                 while markers[0].distance > 1000:
-                    self.medium()
+                    self.slow()
                     self.forwards()
                     markers = self.camera.see()
                     if not markers:
@@ -222,13 +222,14 @@ class Collybot(Robot):
                     print((markers[0].spherical)[1])
                     if ((markers[0].spherical)[1]) < 0.1 and ((markers[0].spherical)[1]) > -0.1:
                         if moving == 'forwards':
-                            self.fast()
+                            self.stop()
+                            self.slow()
                             self.forwards()
                             time.sleep(0.2)
                         else:
                             self.stop()
                             time.sleep(0.2)
-                            self.fast()
+                            self.slow()
                             self.forwards()
                             time.sleep(0.2)
                             moving = 'forwards'
@@ -240,13 +241,14 @@ class Collybot(Robot):
 
                     elif ((markers[0].spherical)[1]) > 0.1:
                         if moving == 'left':
-                            self.medium()
+                            self.stop()
+                            self.slow()
                             self.left()
                             time.sleep(0.2)
                         else:
                             self.stop()
                             time.sleep(0.2)
-                            self.medium()
+                            self.slow()
                             self.left()
                             time.sleep(0.2)
                             moving = 'left'
@@ -258,13 +260,14 @@ class Collybot(Robot):
 
                     else:
                         if moving == 'right':
-                            self.medium()
+                            self.stop()
+                            self.slow()
                             self.right()
                             time.sleep(0.2)
                         else:
                             self.stop()
                             time.sleep(0.2)
-                            self.medium()
+                            self.slow()
                             self.right()
                             time.sleep(0.2)
                             moving = 'right'
@@ -281,12 +284,14 @@ class Collybot(Robot):
             markers = self.camera.see()
             if markers:
                 if ((markers[0].spherical)[1]) > 0:
-                    self.fast()
+                    self.stop()
+                    self.medium()
                     self.forwards()
                     time.sleep(0.25)
                     self.stop()
                 if ((markers[0].spherical)[1]) < 0:
-                    self.fast()
+                    self.stop()
+                    self.medium()
                     self.backwards()
                     time.sleep(0.25)
                     self.stop()
@@ -325,7 +330,6 @@ class Collybot(Robot):
         self.move()
     def returntosender(self):
         self.rotateclockwise()
-        time.sleep(7.5)
 
 
     def can_Regonition(self):
@@ -362,12 +366,12 @@ class Collybot(Robot):
             self.left()
             time.sleep(0.1)
             self.stop()
-        elif self.boxposition[0] >= 171 and self.boxposition[0] <= 799:
+        elif self.boxposition[0] >= 191 and self.boxposition[0] <= 699:
             print("in the centre")
             self.forwards()
             time.sleep(0.5)
             self.stop()
-        elif self.boxposition[0] <= 170:
+        elif self.boxposition[0] <= 190:
             print("going right!")
             self.right()
             time.sleep(0.1)
@@ -391,7 +395,7 @@ class Collybot(Robot):
         else:
             print("object is too far away ignoring")
     def canSeeker(self):
-        for i in range(1,20):
+        for i in range(1,35):
             print("pass")
             print(i)
             try:
@@ -402,9 +406,11 @@ class Collybot(Robot):
             except:
                 print("EXCEPT IS RUNING")
         self.returntosender()
+        time.sleep(6.5)
+        self.stop()
         self.chase_the_markers_advanced()
-    def start(self):
-        time.sleep(10)
+    def start(self): 
+        time.sleep(15)
         self.power_board.piezo.buzz(1, 1047)
         self.scale_conversion()
         self.canSeeker()
