@@ -1,3 +1,4 @@
+
 import cv2
 import numpy as np
 from sr.robot3 import *
@@ -31,6 +32,7 @@ class Collybot(Robot):
         self.net.setInputMean((127.5,127.5,127.5))
         self.net.setInputSwapRB(True)
         self.runonce = 0
+        self.stage = 0
 
     def power_H0(self):
         self.power_board.outputs[OUT_H0].is_enabled = True
@@ -67,9 +69,13 @@ class Collybot(Robot):
 
     def depower_L3(self):
         self.power_board.outputs[OUT_L3].is_enabled = False
+    def ultra_Slow(self):
+        self.master_power = 0.15
+        print("changing to a ultra slow speeds")
+        self.scale_conversion()
     
     def slow(self):
-        self.master_power = 0.15
+        self.master_power = 0.25
         print('Change to slow speed')
         self.scale_conversion()
 
@@ -95,9 +101,9 @@ class Collybot(Robot):
 
     def forwards(self):
         print("moving forwards")
-        self.fl = self.front_master_power
+        self.fl = 1.05*self.front_master_power
         self.fr = self.front_master_power
-        self.bl = self.back_master_power
+        self.bl = 1.05*self.back_master_power
         self.br = self.back_master_power
         self.move()
 
@@ -180,6 +186,10 @@ class Collybot(Robot):
 
     def marker_ids(self):
         self.markers = self.camera.see_ids()
+    def stage2(self):
+        self.rotateclockwise()
+        time.sleep(4)
+        self.canSeeker()
     
     def marker_test(self):
         print("starting marker test")
@@ -197,6 +207,7 @@ class Collybot(Robot):
             markers = self.camera.see()
             if markers:
                 while markers[0].distance > 1000:
+                    self.stop()
                     self.slow()
                     self.forwards()
                     markers = self.camera.see()
@@ -213,71 +224,77 @@ class Collybot(Robot):
 
     def chase_the_markers_advanced(self):
         moving = ''
-        while True:
+        while self.stage == self.runonce:
             markers = self.camera.see()
             if markers:
                 while markers[0].distance > 500:
-                    print((markers[0].spherical))
-                    print((markers[0].spherical)[0])
-                    print((markers[0].spherical)[1])
-                    if ((markers[0].spherical)[1]) < 0.1 and ((markers[0].spherical)[1]) > -0.1:
-                        if moving == 'forwards':
-                            self.stop()
-                            self.slow()
-                            self.forwards()
-                            time.sleep(0.2)
-                        else:
-                            self.stop()
-                            time.sleep(0.2)
-                            self.slow()
-                            self.forwards()
-                            time.sleep(0.2)
-                            moving = 'forwards'
-                        markers = self.camera.see()
-                        if not markers:
-                            self.stop()
-                            time.sleep(0.2)
-                            break
-
-                    elif ((markers[0].spherical)[1]) > 0.1:
-                        if moving == 'left':
-                            self.stop()
-                            self.slow()
-                            self.left()
-                            time.sleep(0.2)
-                        else:
-                            self.stop()
-                            time.sleep(0.2)
-                            self.slow()
-                            self.left()
-                            time.sleep(0.2)
-                            moving = 'left'
-                        markers = self.camera.see()
-                        if not markers:
-                            self.stop()
-                            time.sleep(0.2)
-                            break
-
+                    if markers[0].distance < 600:
+                        self.stage += 1
+                        self.start()
+                        break
                     else:
-                        if moving == 'right':
-                            self.stop()
-                            self.slow()
-                            self.right()
-                            time.sleep(0.2)
+                        print((markers[0].spherical))
+                        print((markers[0].spherical)[0])
+                        print((markers[0].spherical)[1])
+                        if ((markers[0].spherical)[1]) < 0.1 and ((markers[0].spherical)[1]) > -0.1:
+                            if moving == 'forwards':
+                                self.stop()
+                                self.slow()
+                                self.forwards()
+                                time.sleep(0.2)
+                            else:
+                                self.stop()
+                                time.sleep(0.2)
+                                self.slow()
+                                self.forwards()
+                                time.sleep(0.2)
+                                moving = 'forwards'
+                            markers = self.camera.see()
+                            if not markers:
+                                self.stop()
+                                time.sleep(0.2)
+                                break
+
+                        elif ((markers[0].spherical)[1]) > 0.1:
+                            if moving == 'left':
+                                self.stop()
+                                self.ultra_Slow()
+                                self.left()
+                                time.sleep(0.2)
+                            else:
+                                self.stop()
+                                time.sleep(0.2)
+                                self.ultra_Slow()
+                                self.left()
+                                time.sleep(0.2)
+                                moving = 'left'
+                            markers = self.camera.see()
+                            if not markers:
+                                self.stop()
+                                time.sleep(0.2)
+                                break
+
                         else:
-                            self.stop()
-                            time.sleep(0.2)
-                            self.slow()
-                            self.right()
-                            time.sleep(0.2)
-                            moving = 'right'
-                        markers = self.camera.see()
-                        if not markers:
-                            self.stop()
-                            time.sleep(0.2)
-                            break
-                self.stop()
-                time.sleep(0.2)
+                            if moving == 'right':
+                                self.stop()
+                                self.ultra_Slow()
+                                self.right()
+                                time.sleep(0.2)
+                            else:
+                                self.stop()
+                                time.sleep(0.2)
+                                self.ultra_Slow()
+                                self.right()
+                                time.sleep(0.2)
+                                moving = 'right'
+                            markers = self.camera.see()
+                            if not markers:
+                                self.stop()
+                                time.sleep(0.2)
+                                break
+
+                    self.stop()
+                    time.sleep(0.2)
 
     def angle_testing(self):
         while True:
@@ -328,14 +345,14 @@ class Collybot(Robot):
         self.bl = -2*self.back_master_power
         self.br = 2*self.back_master_power
         self.move()
+
     def returntosender(self):
         self.rotateclockwise()
-
-
+        #self.stage2()
     def can_Regonition(self):
         print("opening file!")
         img = cv2.imread(self.path1+"/can_Detection.png")
-        classIds,confs,bbox = self.net.detect(img,confThreshold=0.25)
+        classIds,confs,bbox = self.net.detect(img,confThreshold=0.3)
         if len(classIds) >= 1:
             for classId,confidence,box in zip(classIds.flatten(),confs.flatten(),bbox):
                 can = self.classNames[classId-1]
@@ -364,28 +381,31 @@ class Collybot(Robot):
         if self.boxposition[0] >= 700:
             print("going left")
             self.left()
-            time.sleep(0.1)
+            time.sleep(0.15)
             self.stop()
         elif self.boxposition[0] >= 191 and self.boxposition[0] <= 699:
             print("in the centre")
             self.forwards()
-            time.sleep(0.5)
+            time.sleep(1)
             self.stop()
         elif self.boxposition[0] <= 190:
             print("going right!")
             self.right()
-            time.sleep(0.1)
+            time.sleep(0.15)
             self.stop()
+        else:
+            self.forwards()
+            time.sleep(0.2)
     def where_CanY(self):
-        if self.boxposition[3] < 100 and self.boxposition[3] > 50:
+        if self.boxposition[3] < 200 and self.boxposition[3] > 50:
             print("we are very far away")
-            self.slow()
+            self.ultra_Slow()
             print(self.runonce)
             self.where_CanX()
             #self.DrawLines()
-        elif self.boxposition[3] < 649 and self.boxposition[3] > 100: 
+        elif self.boxposition[3] < 649 and self.boxposition[3] > 200: 
             print("getting closer")
-            self.slow()
+            self.ultra_Slow()
             print(self.runonce)
             self.where_CanX()
         elif self.boxposition[3] >= 650 and self.boxposition < 800:
@@ -395,25 +415,40 @@ class Collybot(Robot):
         else:
             print("object is too far away ignoring")
     def canSeeker(self):
-        for i in range(1,35):
+        for i in range(1,20):
             print("pass")
             print(i)
             try:
-                time.sleep(0.1)
+                time.sleep(0.05)
                 self.camera.save(self.usbkey / "can_Detection.png")
                 print("trying to find cans")
                 self.can_Regonition()
             except:
                 print("EXCEPT IS RUNING")
+        time.sleep(1)
         self.returntosender()
-        time.sleep(6.5)
+        time.sleep(3)
         self.stop()
         self.chase_the_markers_advanced()
-    def start(self): 
-        time.sleep(15)
-        self.power_board.piezo.buzz(1, 1047)
-        self.scale_conversion()
-        self.canSeeker()
+    def start(self):
+        if self.stage == 0:
+            self.runonce = 0
+            print("stage 1 initiated")
+            time.sleep(5)
+            self.scale_conversion()
+            self.power_board.piezo.buzz(1, 1047)
+            self.slow()
+            self.forwards()
+            time.sleep(4)
+            self.canSeeker()
+        elif self.stage == 1:
+            self.runonce = 1
+            print("stage two initated")
+            self.rotateclockwise()
+            time.sleep(2.5)
+            self.power_board.piezo.buzz(1, 1047)
+            self.scale_conversion()
+            self.canSeeker()
             
         
 def main():
